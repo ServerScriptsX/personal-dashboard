@@ -65,25 +65,41 @@ document.addEventListener('DOMContentLoaded', function() {
     { type: 'windy', icon: 'wind', temp: '16°C', description: 'Windy' }
   ];
   
-  function updateWeather() {
-    // In a real app, this would fetch from a weather API
-    // For demo, we'll randomly select from our array
-    const randomIndex = Math.floor(Math.random() * weatherTypes.length);
-    const weather = weatherTypes[randomIndex];
-    
-    document.getElementById('weather-temp').textContent = weather.temp;
-    document.getElementById('weather-desc').textContent = weather.description;
-    
-    // Update weather icon
-    const weatherIconContainer = document.getElementById('weather-icon');
-    weatherIconContainer.innerHTML = '';
-    const iconElement = document.createElement('i');
-    iconElement.setAttribute('data-lucide', weather.icon);
-    weatherIconContainer.appendChild(iconElement);
-    
-    // Initialize the new icon
-    lucide.createIcons({}, [iconElement]);
-  }
+function updateWeather() {
+  const apiKey = '779135c117c86a40265c65f4e35dce57'; // Replace with your actual API key
+  const city = 'Kochi'; // Replace with your desired city
+  const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+
+  fetch(apiUrl)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch weather data');
+      }
+      return response.json();
+    })
+    .then(data => {
+      const temp = `${data.main.temp}°C`;
+      const description = data.weather[0].description;
+      const iconCode = data.weather[0].icon;
+      const iconUrl = `https://openweathermap.org/img/wn/${iconCode}.png`;
+
+      document.getElementById('weather-temp').textContent = temp;
+      document.getElementById('weather-desc').textContent = description;
+
+      // Update weather icon
+      const weatherIconContainer = document.getElementById('weather-icon');
+      weatherIconContainer.innerHTML = '';
+      const imgElement = document.createElement('img');
+      imgElement.src = iconUrl;
+      imgElement.alt = description;
+      weatherIconContainer.appendChild(imgElement);
+    })
+    .catch(error => {
+      console.error('Error fetching weather data:', error);
+      document.getElementById('weather-temp').textContent = 'N/A';
+      document.getElementById('weather-desc').textContent = 'Unable to fetch weather data';
+    });
+}
   
   // Update weather once, then every 60 seconds
   updateWeather();
