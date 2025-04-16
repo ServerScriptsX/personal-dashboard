@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Google Fonts for better typography -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <!-- Include Lucide icons for the dashboard -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/@lucide/web@latest"></script>
+  <!-- Required Lovable script tag for new features -->
+  <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+</head>
+<body>
+  <div class="app" id="app">
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+      <div class="header-title">
+        <h1>Personal Dashboard</h1>
+      </div>
+      <div class="header-actions">
+        <button class="icon-button" id="theme-toggle" aria-label="Toggle dark mode">
+          <i data-lucide="sun" class="theme-icon" id="theme-icon"></i>
+        </button>
+        <button class="icon-button" id="notification-button" aria-label="Notifications">
+          <i data-lucide="bell"></i>
+        </button>
+        <button class="icon-button" aria-label="Settings">
+          <i data-lucide="settings"></i>
+        </button>
+        <button class="icon-button" aria-label="User profile">
+          <i data-lucide="user"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Content -->
+    <main class="dashboard-content">
+      <div class="dashboard-grid">
+        <!-- Notes Widget -->
+        <div class="widget large-widget">
+          <div class="widget-header">
+            <h2>Quick Notes</h2>
+            <button class="small-button" id="save-notes-button">
+              <i data-lucide="save" class="small-icon"></i>
+              Save
+            </button>
+          </div>
+          <div class="widget-content">
+            <textarea id="notes-textarea" placeholder="Type your notes here...">Welcome to your personal dashboard! Use this space to jot down quick notes, ideas, or reminders throughout your day.</textarea>
+          </div>
+        </div>
+
+        <!-- Calendar Widget -->
+        <div class="widget">
+          <div class="widget-header">
+            <h2>Date & Time</h2>
+          </div>
+          <div class="widget-content">
+            <div class="calendar-container">
+              <div class="time" id="current-time">3:45 PM</div>
+              <div class="date" id="current-date">Wednesday, April 16th, 2025</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weather Widget -->
+        <div class="widget">
+          <div class="widget-header">
+            <h2>Weather</h2>
+          </div>
+          <div class="widget-content">
+            <div class="weather-container">
+              <div class="weather-info">
+                <div class="weather-temp" id="weather-temp">22°C</div>
+                <div class="weather-desc" id="weather-desc">Sunny</div>
+                <div class="weather-location">Nilambur, Kerala, India</div>
+              </div>
+              <div class="weather-icon" id="weather-icon">
+                <i data-lucide="sun"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Todo Widget -->
+        <div class="widget">
+          <div class="widget-header">
+            <h2>Tasks</h2>
+          </div>
+          <div class="widget-content">
+            <div class="todo-container">
+              <div class="todo-input-container">
+                <input type="text" id="todo-input" placeholder="Add a new task...">
+                <button class="small-button" id="add-todo-button">
+                  <i data-lucide="plus" class="small-icon"></i>
+                </button>
+              </div>
+              <ul class="todo-list" id="todo-list">
+                <!-- Todo items will be added here via JavaScript -->
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bookmarks Widget -->
+        <div class="widget">
+          <div class="widget-header">
+            <h2>Bookmarks</h2>
+            <button class="small-button" id="add-bookmark-button">
+              <i data-lucide="plus" class="small-icon"></i>
+              Add
+            </button>
+          </div>
+          <div class="widget-content">
+            <div class="bookmarks-grid" id="bookmarks-grid">
+              <!-- Bookmark items will be added here via JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Bookmark Dialog (Modal) -->
+    <div class="modal" id="bookmark-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Add Bookmark</h2>
+          <button class="close-button" id="close-modal-button">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="bookmark-title">Title</label>
+            <input type="text" id="bookmark-title" placeholder="Google">
+          </div>
+          <div class="form-group">
+            <label for="bookmark-url">URL</label>
+            <input type="text" id="bookmark-url" placeholder="https://google.com">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="primary-button" id="save-bookmark-button">Add Bookmark</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
