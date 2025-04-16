@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
 function updateWeather() {
   const apiKey = '779135c117c86a40265c65f4e35dce57'; // Replace with your actual API key
-  const city = 'Kochi'; // Replace with your desired city
+  const city = 'Nilambur'; // Replace with your desired city
   const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
 
   fetch(apiUrl)
