@@ -376,203 +376,221 @@ document.addEventListener('DOMContentLoaded', function() {
      }, 3000);
    }
  });
- // Spotify API Integration
- const clientId = 'efb40a08c5814e05bd792699a244ec26';
- const redirectUri = 'https://serverscriptsx.github.io/personal-dashboard/';
- const scopes = 'user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private';
- 
- const spotifyLoginBtn = document.getElementById('spotify-login-btn');
- const spotifyContent = document.getElementById('spotify-content');
- const songTitleElement = document.getElementById('song-title');
- const artistNameElement = document.getElementById('artist-name');
- const playPauseBtn = document.getElementById('play-pause-btn');
- const prevBtn = document.getElementById('prev-btn');
- const nextBtn = document.getElementById('next-btn');
- const playlistTracksList = document.getElementById('playlist-tracks');
- 
- let accessToken = null;
- 
- // Function to extract access token from URL hash
- function getAccessTokenFromUrl() {
-     const hash = window.location.hash.substring(1);
-     const params = new URLSearchParams(hash);
-     return params.get('access_token');
- }
- 
- // Function to handle Spotify login
- function loginToSpotify() {
-     const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&scope=${encodeURIComponent(scopes)}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-     window.location.href = authUrl;
- }
- 
- // Function to fetch currently playing track
- async function fetchCurrentTrack() {
-     if (!accessToken) return;
-     try {
-         const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-             headers: {
-                 'Authorization': `Bearer ${accessToken}`
-             }
-         });
-         if (response.ok) {
-             const data = await response.json();
-             if (data && data.item) {
-                 songTitleElement.textContent = data.item.name;
-                 artistNameElement.textContent = data.item.artists.map(artist => artist.name).join(', ');
-                 spotifyContent.style.display = 'block';
-                 spotifyLoginBtn.style.display = 'none';
-                 updatePlayPauseButton(data.is_playing);
-             } else {
-                 songTitleElement.textContent = 'No song playing';
-                 artistNameElement.textContent = '';
-                 updatePlayPauseButton(false);
-             }
-         } else if (response.status === 204) {
-             songTitleElement.textContent = 'No song playing';
-             artistNameElement.textContent = '';
-             updatePlayPauseButton(false);
-         } else {
-             console.error('Failed to fetch current track:', response.status);
-         }
-     } catch (error) {
-         console.error('Error fetching current track:', error);
-     }
- }
- 
- // Function to fetch current user's playlists (we'll just display the first one for now)
- async function fetchPlaylists() {
-     if (!accessToken) return;
-     try {
-         const response = await fetch('https://api.spotify.com/v1/me/playlists', {
-             headers: {
-                 'Authorization': `Bearer ${accessToken}`
-             }
-         });
-         if (response.ok) {
-             const data = await response.json();
-             if (data.items && data.items.length > 0) {
-                 // For simplicity, let's fetch tracks from the first playlist
-                 const playlistId = data.items[0].id;
-                 fetchPlaylistTracks(playlistId);
-             } else {
-                 playlistTracksList.innerHTML = '<li>No playlists found</li>';
-             }
-         } else {
-             console.error('Failed to fetch playlists:', response.status);
-         }
-     } catch (error) {
-         console.error('Error fetching playlists:', error);
-     }
- }
- 
- // Function to fetch tracks from a specific playlist
- async function fetchPlaylistTracks(playlistId) {
-     if (!accessToken) return;
-     try {
-         const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
-             headers: {
-                 'Authorization': `Bearer ${accessToken}`
-             }
-         });
-         if (response.ok) {
-             const data = await response.json();
-             playlistTracksList.innerHTML = '';
-             data.items.forEach(item => {
-                 if (item.track) {
-                     const listItem = document.createElement('li');
-                     listItem.textContent = item.track.name;
-                     playlistTracksList.appendChild(listItem);
-                 }
-             });
-         } else {
-             console.error('Failed to fetch playlist tracks:', response.status);
-         }
-     } catch (error) {
-         console.error('Error fetching playlist tracks:', error);
-     }
- }
- 
- // Function to update the play/pause button icon
- function updatePlayPauseButton(isPlaying) {
-     const playIcon = '<i data-lucide="play" class="small-icon"></i>';
-     const pauseIcon = '<i data-lucide="pause" class="small-icon"></i>';
-     playPauseBtn.innerHTML = isPlaying ? pauseIcon : playIcon;
-     lucide.createIcons({ attrs: { class: 'small-icon' } }, playPauseBtn);
- }
- 
- // Function to toggle play/pause
- async function togglePlayPause() {
-     if (!accessToken) return;
-     try {
-         const method = playPauseBtn.innerHTML.includes('play') ? 'PUT' : 'DELETE';
-         const response = await fetch('https://api.spotify.com/v1/me/player', {
-             method: method,
-             headers: {
-                 'Authorization': `Bearer ${accessToken}`
-             }
-         });
-         if (response.ok || response.status === 204) {
-             // Re-fetch current track to update UI
-             fetchCurrentTrack();
-         } else {
-             console.error('Failed to toggle play/pause:', response.status);
-         }
-     } catch (error) {
-         console.error('Error toggling play/pause:', error);
-     }
- }
- 
- // Function to skip to the next track
- async function skipToNext() {
-     if (!accessToken) return;
-     try {
-         const response = await fetch('https://api.spotify.com/v1/me/player/next', {
-             method: 'POST',
-             headers: {
-                 'Authorization': `Bearer ${accessToken}`
-             }
-         });
-         if (response.ok || response.status === 204) {
-             fetchCurrentTrack();
-         } else {
-             console.error('Failed to skip to next:', response.status);
-         }
-     } catch (error) {
-         console.error('Error skipping to next:', error);
-     }
- }
- 
- // Function to skip to the previous track
- async function skipToPrevious() {
-     if (!accessToken) return;
-     try {
-         const response = await fetch('https://api.spotify.com/v1/me/player/previous', {
-             method: 'POST',
-             headers: {
-                 'Authorization': `Bearer ${accessToken}`
-             }
-         });
-         if (response.ok || response.status === 204) {
-             fetchCurrentTrack();
-         } else {
-             console.error('Failed to skip to previous:', response.status);
-         }
-     } catch (error) {
-         console.error('Error skipping to previous:', error);
-     }
- }
- 
- // Event listeners
- spotifyLoginBtn.addEventListener('click', loginToSpotify);
- playPauseBtn.addEventListener('click', togglePlayPause);
- nextBtn.addEventListener('click', skipToNext);
- prevBtn.addEventListener('click', skipToPrevious);
- 
- // Check for access token on page load
- accessToken = getAccessTokenFromUrl();
- if (accessToken) {
-     fetchCurrentTrack();
-     fetchPlaylists();
-     spotifyContent.style.display = 'block';
-     spotifyLoginBtn.style.display = 'none';
- }
+// Spotify API Integration
+const clientId = 'efb40a08c5814e05bd792699a244ec26';
+const redirectUri = 'https://serverscriptsx.github.io/personal-dashboard/';
+const scopes = 'user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private';
+
+const spotifyLoginBtn = document.getElementById('spotify-login-btn');
+const spotifyContent = document.getElementById('spotify-content');
+const songTitleElement = document.getElementById('song-title');
+const artistNameElement = document.getElementById('artist-name');
+const playPauseBtn = document.getElementById('play-pause-btn');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const playlistTracksList = document.getElementById('playlist-tracks');
+
+let accessToken = null;
+
+// Function to extract access token from URL hash
+function getAccessTokenFromUrl() {
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    return params.get('access_token');
+}
+
+// Function to handle Spotify login
+function loginToSpotify() {
+    const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&scope=${encodeURIComponent(scopes)}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    window.location.href = authUrl;
+}
+
+// Function to fetch currently playing track
+async function fetchCurrentTrack() {
+    if (!accessToken) return;
+    try {
+        const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            if (data && data.item) {
+                songTitleElement.textContent = data.item.name;
+                artistNameElement.textContent = data.item.artists.map(artist => artist.name).join(', ');
+                spotifyContent.style.display = 'block';
+                spotifyLoginBtn.style.display = 'none';
+                updatePlayPauseButton(data.is_playing);
+            } else {
+                songTitleElement.textContent = 'No song playing';
+                artistNameElement.textContent = '';
+                updatePlayPauseButton(false);
+            }
+        } else if (response.status === 204) {
+            songTitleElement.textContent = 'No song playing';
+            artistNameElement.textContent = '';
+            updatePlayPauseButton(false);
+        } else if (response.status === 401) {
+            console.error('Unauthorized. Redirecting to login.');
+            loginToSpotify(); // Token expired, re-login
+        } else {
+            console.error('Failed to fetch current track:', response.status);
+        }
+    } catch (error) {
+        console.error('Error fetching current track:', error);
+    }
+}
+
+// Function to fetch current user's playlists (we'll just display the first one for now)
+async function fetchPlaylists() {
+    if (!accessToken) return;
+    try {
+        const response = await fetch('https://api.spotify.com/v1/me/playlists', {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            if (data.items && data.items.length > 0) {
+                // For simplicity, let's fetch tracks from the first playlist
+                const playlistId = data.items[0].id;
+                fetchPlaylistTracks(playlistId);
+            } else {
+                playlistTracksList.innerHTML = '<li>No playlists found</li>';
+            }
+        } else if (response.status === 401) {
+            console.error('Unauthorized. Redirecting to login.');
+            loginToSpotify(); // Token expired, re-login
+        } else {
+            console.error('Failed to fetch playlists:', response.status);
+        }
+    } catch (error) {
+        console.error('Error fetching playlists:', error);
+    }
+}
+
+// Function to fetch tracks from a specific playlist
+async function fetchPlaylistTracks(playlistId) {
+    if (!accessToken) return;
+    try {
+        const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            playlistTracksList.innerHTML = '';
+            data.items.forEach(item => {
+                if (item.track) {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = item.track.name;
+                    playlistTracksList.appendChild(listItem);
+                }
+            });
+        } else if (response.status === 401) {
+            console.error('Unauthorized. Redirecting to login.');
+            loginToSpotify(); // Token expired, re-login
+        } else {
+            console.error('Failed to fetch playlist tracks:', response.status);
+        }
+    } catch (error) {
+        console.error('Error fetching playlist tracks:', error);
+    }
+}
+
+// Function to update the play/pause button icon
+function updatePlayPauseButton(isPlaying) {
+    const playIcon = '<i data-lucide="play" class="small-icon"></i>';
+    const pauseIcon = '<i data-lucide="pause" class="small-icon"></i>';
+    playPauseBtn.innerHTML = isPlaying ? pauseIcon : playIcon;
+    lucide.createIcons({ attrs: { class: 'small-icon' } }, playPauseBtn);
+}
+
+// Function to toggle play/pause
+async function togglePlayPause() {
+    if (!accessToken) return;
+    try {
+        const method = playPauseBtn.innerHTML.includes('play') ? 'PUT' : 'PAUSE'; // Corrected to 'PAUSE'
+        const response = await fetch('https://api.spotify.com/v1/me/player', {
+            method: method,
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        if (response.ok || response.status === 204) {
+            // Re-fetch current track to update UI
+            fetchCurrentTrack();
+        } else if (response.status === 401) {
+            console.error('Unauthorized. Redirecting to login.');
+            loginToSpotify(); // Token expired, re-login
+        } else {
+            console.error('Failed to toggle play/pause:', response.status);
+        }
+    } catch (error) {
+        console.error('Error toggling play/pause:', error);
+    }
+}
+
+// Function to skip to the next track
+async function skipToNext() {
+    if (!accessToken) return;
+    try {
+        const response = await fetch('https://api.spotify.com/v1/me/player/next', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        if (response.ok || response.status === 204) {
+            fetchCurrentTrack();
+        } else if (response.status === 401) {
+            console.error('Unauthorized. Redirecting to login.');
+            loginToSpotify(); // Token expired, re-login
+        } else {
+            console.error('Failed to skip to next:', response.status);
+        }
+    } catch (error) {
+        console.error('Error skipping to next:', error);
+    }
+}
+
+// Function to skip to the previous track
+async function skipToPrevious() {
+    if (!accessToken) return;
+    try {
+        const response = await fetch('https://api.spotify.com/v1/me/player/previous', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        if (response.ok || response.status === 204) {
+            fetchCurrentTrack();
+        } else if (response.status === 401) {
+            console.error('Unauthorized. Redirecting to login.');
+            loginToSpotify(); // Token expired, re-login
+        } else {
+            console.error('Failed to skip to previous:', response.status);
+        }
+    } catch (error) {
+        console.error('Error skipping to previous:', error);
+    }
+}
+
+// Event listeners
+spotifyLoginBtn.addEventListener('click', loginToSpotify);
+playPauseBtn.addEventListener('click', togglePlayPause);
+nextBtn.addEventListener('click', skipToNext);
+prevBtn.addEventListener('click', skipToPrevious);
+
+// Check for access token on page load
+accessToken = getAccessTokenFromUrl();
+if (accessToken) {
+    fetchCurrentTrack();
+    fetchPlaylists();
+    spotifyContent.style.display = 'block';
+    spotifyLoginBtn.style.display = 'none';
+}
