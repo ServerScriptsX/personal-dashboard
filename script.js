@@ -401,7 +401,7 @@ function getAccessTokenFromUrl() {
 
 // Function to handle Spotify login
 function loginToSpotify() {
-    const authUrl = `https://accounts.spotify.com/authorize?client_id=${efb40a08c5814e05bd792699a244ec26}&response_type=token&scope=${encodeURIComponent(user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private)}&redirect_uri=${encodeURIComponent(www.serverscriptsx.github.io/personal-dashboard/)}`;
+    const authUrl = `https://accounts.spotify.com/authorize?client_id=${efb40a08c5814e05bd792699a244ec26}response_type=token&scope=${encodeURIComponent(user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private)}&redirect_uri=${encodeURIComponent(www.serverscriptsx.github.io/personal-dashboard/)}`;
     window.location.href = authUrl;
 }
 
