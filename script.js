@@ -378,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
  });
 // Spotify API Integration
 const clientId = 'efb40a08c5814e05bd792699a244ec26';
-const redirectUri = 'open.spotify.com';
+const redirectUri = 'https://open.spotify.com';
 const scopes = 'user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private';
 
 const spotifyLoginBtn = document.getElementById('spotify-login-btn');
